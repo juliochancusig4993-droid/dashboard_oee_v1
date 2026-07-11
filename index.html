@@ -1487,12 +1487,40 @@
         let filteredData = [];
         let charts = {};
 
+        function getElement(id) {
+            return document.getElementById(id);
+        }
+
+        function setText(id, value) {
+            const element = getElement(id);
+            if (element) {
+                element.textContent = value;
+            }
+        }
+
+        function setHtml(id, html) {
+            const element = getElement(id);
+            if (element) {
+                element.innerHTML = html;
+            }
+        }
+
+        function getCanvasContext(id) {
+            const canvas = getElement(id);
+            return canvas ? canvas.getContext('2d') : null;
+        }
+
         // Cargar datos del CSV
         async function loadData() {
             try {
                 const response = await fetch('monitoreo_oee_produccion.csv');
+                if (!response.ok) {
+                    throw new Error('No se pudo leer el archivo base del dashboard');
+                }
+
                 const csvText = await response.text();
-                parseCSV(csvText);
+                allData = parseCSV(csvText);
+                filteredData = [...allData];
                 initializeFilters();
                 renderDashboard();
                 generateAIInsights();
@@ -1504,17 +1532,19 @@
 
         // Manejar carga de archivos
         function handleFileUpload(event) {
-            const file = event.target.files[0];
+            const file = event.target.files && event.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const csvText = e.target.result;
-                    allData = [];
-                    parseCSV(csvText);
+                    allData = parseCSV(csvText);
                     
                     if (allData.length === 0) {
+                        filteredData = [];
+                        renderDashboard();
+                        generateAIInsights();
                         showAlert('El archivo CSV está vacío o no tiene el formato correcto', 'warning');
                         return;
                     }
@@ -1543,37 +1573,103 @@
             reader.readAsText(file);
         }
 
+        function detectDelimiter(csvText) {
+            const commaCount = (csvText.match(/,/g) || []).length;
+            const semicolonCount = (csvText.match(/;/g) || []).length;
+            return semicolonCount > commaCount ? ';' : ',';
+        }
+
+        function normalizeHeader(header) {
+            return (header || '')
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9]+/g, '_')
+                .replace(/^_+|_+$/g, '');
+        }
+
+        function mapRowToExpectedSchema(row) {
+            const normalized = {};
+            Object.entries(row).forEach(([key, value]) => {
+                const normalizedKey = normalizeHeader(key);
+                normalized[normalizedKey] = value;
+            });
+
+            const aliases = {
+                fecha: ['fecha', 'date', 'dia', 'fecha_registro'],
+                linea: ['linea', 'line', 'linea_produccion', 'production_line'],
+                turno: ['turno', 'shift', 'turno_produccion'],
+                unidades_producidas: ['unidades_producidas', 'unidades', 'produced_units', 'qty_produced'],
+                unidades_defectuosas: ['unidades_defectuosas', 'defectuosas', 'defective_units', 'qty_defective'],
+                tiempo_parada_min: ['tiempo_parada_min', 'tiempo_parada', 'downtime_min', 'parada_min'],
+                eficiencia_oee: ['eficiencia_oee', 'oee', 'eficiencia', 'oee_percent']
+            };
+
+            const mapped = {};
+            Object.entries(aliases).forEach(([target, candidates]) => {
+                const sourceKey = Object.keys(normalized).find(key => candidates.includes(key));
+                mapped[target] = sourceKey ? normalized[sourceKey] : '';
+            });
+
+            return mapped;
+        }
+
         // Parsear CSV
         function parseCSV(csvText) {
-            const lines = csvText.trim().split('\n');
-            const headers = lines[0].split(',');
-            
+            if (!csvText || typeof csvText !== 'string') return [];
+
+            const delimiter = detectDelimiter(csvText);
+            const lines = csvText
+                .replace(/\uFEFF/g, '')
+                .split(/\r?\n/)
+                .map(line => line.trim())
+                .filter(line => line.length > 0);
+
+            if (lines.length === 0) return [];
+
+            const headers = lines[0].split(delimiter).map(header => header.trim());
+            const rows = [];
+
             for (let i = 1; i < lines.length; i++) {
-                if (lines[i].trim() === '') continue;
-                
-                const values = lines[i].split(',');
+                const values = lines[i].split(delimiter).map(value => value.trim());
+                if (values.length !== headers.length) continue;
+
                 const row = {};
-                
                 headers.forEach((header, index) => {
-                    row[header.trim()] = values[index].trim();
+                    row[header] = values[index] || '';
                 });
-                
-                allData.push(row);
+
+                const mappedRow = mapRowToExpectedSchema(row);
+                if (mappedRow.fecha || mappedRow.linea || mappedRow.turno || mappedRow.eficiencia_oee) {
+                    rows.push(mappedRow);
+                }
             }
-            
-            filteredData = [...allData];
+
+            return rows;
         }
 
         // Inicializar filtros
         function initializeFilters() {
-            document.getElementById('filterLinea').addEventListener('change', applyFilters);
-            document.getElementById('filterTurno').addEventListener('change', applyFilters);
+            const filterLinea = getElement('filterLinea');
+            const filterTurno = getElement('filterTurno');
+
+            if (filterLinea) {
+                filterLinea.removeEventListener('change', applyFilters);
+                filterLinea.addEventListener('change', applyFilters);
+            }
+
+            if (filterTurno) {
+                filterTurno.removeEventListener('change', applyFilters);
+                filterTurno.addEventListener('change', applyFilters);
+            }
         }
 
         // Aplicar filtros
         function applyFilters() {
-            const linea = document.getElementById('filterLinea').value;
-            const turno = document.getElementById('filterTurno').value;
+            const filterLinea = getElement('filterLinea');
+            const filterTurno = getElement('filterTurno');
+            const linea = filterLinea ? filterLinea.value : '';
+            const turno = filterTurno ? filterTurno.value : '';
 
             filteredData = allData.filter(row => {
                 const matchLinea = linea === '' || row.linea === linea;
@@ -1586,8 +1682,11 @@
 
         // Reiniciar filtros
         function resetFilters() {
-            document.getElementById('filterLinea').value = '';
-            document.getElementById('filterTurno').value = '';
+            const filterLinea = getElement('filterLinea');
+            const filterTurno = getElement('filterTurno');
+
+            if (filterLinea) filterLinea.value = '';
+            if (filterTurno) filterTurno.value = '';
             filteredData = [...allData];
             renderDashboard();
         }
@@ -1602,55 +1701,48 @@
         // Actualizar KPIs
         function updateKPIs() {
             if (filteredData.length === 0) {
-                document.getElementById('kpiOEE').textContent = '--';
-                document.getElementById('kpiUnidades').textContent = '--';
-                document.getElementById('kpiDefectos').textContent = '--';
-                document.getElementById('kpiParada').textContent = '--';
+                setText('kpiOEE', '--');
+                setText('kpiUnidades', '--');
+                setText('kpiDefectos', '--');
+                setText('kpiParada', '--');
                 return;
             }
 
             // OEE Promedio
-            const oeeAvg = (filteredData.reduce((sum, row) => sum + parseFloat(row.eficiencia_oee), 0) / filteredData.length).toFixed(1);
-            document.getElementById('kpiOEE').textContent = oeeAvg + '%';
+            const oeeAvg = (filteredData.reduce((sum, row) => sum + parseFloat(row.eficiencia_oee || 0), 0) / filteredData.length).toFixed(1);
+            setText('kpiOEE', oeeAvg + '%');
 
             // Unidades Producidas Total
-            const totalUnidades = filteredData.reduce((sum, row) => sum + parseInt(row.unidades_producidas), 0);
-            document.getElementById('kpiUnidades').textContent = totalUnidades.toLocaleString();
+            const totalUnidades = filteredData.reduce((sum, row) => sum + parseInt(row.unidades_producidas || 0, 10), 0);
+            setText('kpiUnidades', totalUnidades.toLocaleString());
 
             // Tasa de Defectos
-            const totalDefectos = filteredData.reduce((sum, row) => sum + parseInt(row.unidades_defectuosas), 0);
+            const totalDefectos = filteredData.reduce((sum, row) => sum + parseInt(row.unidades_defectuosas || 0, 10), 0);
             const tasaDefectos = totalUnidades > 0 ? ((totalDefectos / totalUnidades) * 100).toFixed(2) : 0;
-            document.getElementById('kpiDefectos').textContent = tasaDefectos + '%';
+            setText('kpiDefectos', tasaDefectos + '%');
 
             // Tiempo de Parada Total
-            const totalParada = filteredData.reduce((sum, row) => sum + parseInt(row.tiempo_parada_min), 0);
-            document.getElementById('kpiParada').textContent = totalParada + ' min';
+            const totalParada = filteredData.reduce((sum, row) => sum + parseInt(row.tiempo_parada_min || 0, 10), 0);
+            setText('kpiParada', totalParada + ' min');
 
             // Cambios (comparación con media general)
-            const allOEEAvg = (allData.reduce((sum, row) => sum + parseFloat(row.eficiencia_oee), 0) / allData.length).toFixed(1);
-            const oeeChangePercent = ((oeeAvg - allOEEAvg) / allOEEAvg * 100).toFixed(1);
-            const oeeChangeEl = document.getElementById('kpiOEEChange');
-            oeeChangeEl.textContent = (oeeChangePercent > 0 ? '+' : '') + oeeChangePercent + '% vs. promedio';
-            oeeChangeEl.className = oeeChangePercent >= 0 ? 'kpi-change positive' : 'kpi-change negative';
+            const allOEEAvg = (allData.reduce((sum, row) => sum + parseFloat(row.eficiencia_oee || 0), 0) / Math.max(allData.length, 1)).toFixed(1);
+            const oeeChangePercent = allOEEAvg !== '0.0' ? (((parseFloat(oeeAvg) - parseFloat(allOEEAvg)) / parseFloat(allOEEAvg)) * 100).toFixed(1) : '0.0';
+            const oeeChangeEl = getElement('kpiOEEChange');
+            if (oeeChangeEl) {
+                oeeChangeEl.textContent = (parseFloat(oeeChangePercent) > 0 ? '+' : '') + oeeChangePercent + '% vs. promedio';
+                oeeChangeEl.className = parseFloat(oeeChangePercent) >= 0 ? 'kpi-change positive' : 'kpi-change negative';
+            }
         }
 
         // Actualizar Gráficos
         function updateCharts() {
             destroyCharts();
 
-            // Gráfico 1: Evolución del OEE
             chartOEETrend();
-
-            // Gráfico 2: OEE por Línea
             chartOEEByLine();
-
-            // Gráfico 3: Defectos
             chartDefects();
-
-            // Gráfico 4: Downtime
             chartDowntime();
-
-            // Gráfico 5: Producción
             chartProduction();
         }
 
@@ -1664,13 +1756,15 @@
 
         // Gráfico 1: Evolución del OEE
         function chartOEETrend() {
+            const ctx = getCanvasContext('chartOEETrend');
+            if (!ctx) return;
+
             const dates = [...new Set(filteredData.map(row => row.fecha))].sort();
             const oeeByDate = dates.map(date => {
                 const rowsByDate = filteredData.filter(row => row.fecha === date);
-                return (rowsByDate.reduce((sum, row) => sum + parseFloat(row.eficiencia_oee), 0) / rowsByDate.length).toFixed(1);
+                return (rowsByDate.reduce((sum, row) => sum + parseFloat(row.eficiencia_oee || 0), 0) / rowsByDate.length).toFixed(1);
             });
 
-            const ctx = document.getElementById('chartOEETrend').getContext('2d');
             charts.oee = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -1716,15 +1810,17 @@
 
         // Gráfico 2: OEE por Línea
         function chartOEEByLine() {
+            const ctx = getCanvasContext('chartOEEByLine');
+            if (!ctx) return;
+
             const lines = ['Linea A', 'Linea B', 'Linea C'];
             const oeeByLine = lines.map(line => {
                 const rowsByLine = filteredData.filter(row => row.linea === line);
-                return rowsByLine.length > 0 ? (rowsByLine.reduce((sum, row) => sum + parseFloat(row.eficiencia_oee), 0) / rowsByLine.length).toFixed(1) : 0;
+                return rowsByLine.length > 0 ? (rowsByLine.reduce((sum, row) => sum + parseFloat(row.eficiencia_oee || 0), 0) / rowsByLine.length).toFixed(1) : 0;
             });
 
             const colors = ['#00d4ff', '#00ff88', '#ffa502'];
 
-            const ctx = document.getElementById('chartOEEByLine').getContext('2d');
             charts.oeeByLine = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -1763,13 +1859,15 @@
 
         // Gráfico 3: Defectos por Línea
         function chartDefects() {
+            const ctx = getCanvasContext('chartDefects');
+            if (!ctx) return;
+
             const lines = ['Linea A', 'Linea B', 'Linea C'];
             const defectsByLine = lines.map(line => {
                 const rowsByLine = filteredData.filter(row => row.linea === line);
-                return rowsByLine.reduce((sum, row) => sum + parseInt(row.unidades_defectuosas), 0);
+                return rowsByLine.reduce((sum, row) => sum + parseInt(row.unidades_defectuosas || 0, 10), 0);
             });
 
-            const ctx = document.getElementById('chartDefects').getContext('2d');
             charts.defects = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -1805,13 +1903,15 @@
 
         // Gráfico 4: Downtime
         function chartDowntime() {
+            const ctx = getCanvasContext('chartDowntime');
+            if (!ctx) return;
+
             const lines = ['Linea A', 'Linea B', 'Linea C'];
             const downtimeByLine = lines.map(line => {
                 const rowsByLine = filteredData.filter(row => row.linea === line);
-                return rowsByLine.reduce((sum, row) => sum + parseInt(row.tiempo_parada_min), 0);
+                return rowsByLine.reduce((sum, row) => sum + parseInt(row.tiempo_parada_min || 0, 10), 0);
             });
 
-            const ctx = document.getElementById('chartDowntime').getContext('2d');
             charts.downtime = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -1847,6 +1947,9 @@
 
         // Gráfico 5: Producción
         function chartProduction() {
+            const ctx = getCanvasContext('chartProduction');
+            if (!ctx) return;
+
             const lines = ['Linea A', 'Linea B', 'Linea C'];
             const turnos = ['Mañana', 'Tarde'];
 
@@ -1854,7 +1957,7 @@
                 const colors = ['#00d4ff', '#00ff88'];
                 const data = lines.map(line => {
                     const row = filteredData.find(r => r.linea === line && r.turno === turno);
-                    return row ? parseInt(row.unidades_producidas) : 0;
+                    return row ? parseInt(row.unidades_producidas || 0, 10) : 0;
                 });
                 return {
                     label: turno,
@@ -1866,7 +1969,6 @@
                 };
             });
 
-            const ctx = document.getElementById('chartProduction').getContext('2d');
             charts.production = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -1897,42 +1999,33 @@
 
         // Actualizar Tabla
         function updateTable() {
-            const tableBody = document.getElementById('tableBody');
+            const tableBody = getElement('tableBody');
+            if (!tableBody) return;
+
             tableBody.innerHTML = '';
 
             filteredData.forEach(row => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${row.fecha}</td>
-                    <td><strong>${row.linea}</strong></td>
-                    <td>${row.turno}</td>
-                    <td>${parseInt(row.unidades_producidas).toLocaleString()}</td>
-                    <td>${row.unidades_defectuosas}</td>
-                    <td>${row.tiempo_parada_min}</td>
-                    <td><strong>${row.eficiencia_oee}%</strong></td>
+                    <td>${row.fecha || '--'}</td>
+                    <td><strong>${row.linea || '--'}</strong></td>
+                    <td>${row.turno || '--'}</td>
+                    <td>${parseInt(row.unidades_producidas || 0, 10).toLocaleString()}</td>
+                    <td>${row.unidades_defectuosas || 0}</td>
+                    <td>${row.tiempo_parada_min || 0}</td>
+                    <td><strong>${row.eficiencia_oee || '--'}%</strong></td>
                 `;
                 tableBody.appendChild(tr);
-            });
-
-            if ($.fn.dataTable.isDataTable('#dataTable')) {
-                $('#dataTable').DataTable().destroy();
-            }
-
-            $('#dataTable').DataTable({
-                paging: true,
-                pageLength: 10,
-                searching: true,
-                ordering: true,
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'
-                }
             });
         }
 
         // Análisis Inteligente
         function generateAIInsights() {
+            const aiInsights = getElement('aiInsights');
+            if (!aiInsights) return;
+
             if (filteredData.length === 0) {
-                document.getElementById('aiInsights').innerHTML = '<div class="insight-box"><div class="insight-label">Sin datos</div><div class="insight-value">--</div></div>';
+                aiInsights.innerHTML = '<div class="insight-box"><div class="insight-label">Sin datos</div><div class="insight-value">--</div></div>';
                 return;
             }
 
@@ -1992,7 +2085,7 @@
                 </div>
             `;
 
-            document.getElementById('aiInsights').innerHTML = html;
+            aiInsights.innerHTML = html;
         }
 
         // Analizar datos y generar insights
@@ -2262,14 +2355,15 @@
             `;
 
             // Inyectar modal en el DOM
-            let existingModal = document.getElementById('analysisModal');
+            let existingModal = getElement('analysisModal');
             if (existingModal) existingModal.remove();
             
             document.body.insertAdjacentHTML('beforeend', modalHTML);
             
             // Mostrar con animación
             setTimeout(() => {
-                document.getElementById('analysisModal').classList.add('show');
+                const modal = getElement('analysisModal');
+                if (modal) modal.classList.add('show');
             }, 10);
         }
 
@@ -2292,7 +2386,7 @@
 
         // Cerrar modal de análisis
         function closeAnalysisModal() {
-            const modal = document.getElementById('analysisModal');
+            const modal = getElement('analysisModal');
             if (modal) {
                 modal.classList.remove('show');
                 setTimeout(() => modal.remove(), 300);
@@ -2375,6 +2469,8 @@
 
         // Mostrar alertas
         function showAlert(message, type) {
+            if (!document.body) return;
+
             const alert = document.createElement('div');
             alert.className = `alert-custom alert-${type}-custom animate-in`;
             alert.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
@@ -2392,8 +2488,8 @@
         function updateDate() {
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
             const today = new Date().toLocaleDateString('es-ES', options);
-            document.getElementById('current-date').textContent = today;
-            document.getElementById('footer-date').textContent = today;
+            setText('current-date', today);
+            setText('footer-date', today);
         }
 
         // Inicializar
