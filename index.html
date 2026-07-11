@@ -835,6 +835,405 @@
                 opacity: 0.7;
             }
         }
+
+        /* Analysis Modal Styles */
+        .analysis-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(5, 8, 16, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            padding: 20px;
+        }
+
+        .analysis-modal.show {
+            opacity: 1;
+        }
+
+        .analysis-modal-content {
+            background: linear-gradient(135deg, #0f1335 0%, #1a1f3a 100%);
+            border-radius: 20px;
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 212, 255, 0.3);
+            max-width: 900px;
+            max-height: 85vh;
+            overflow-y: auto;
+            animation: slideInUp 0.4s ease;
+        }
+
+        .analysis-modal-header {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);
+            color: #0a0e27;
+            padding: 25px;
+            border-radius: 18px 18px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .analysis-modal-header h2 {
+            margin: 0;
+            font-size: 1.6rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .close-modal {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: #0a0e27;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-modal:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: rotate(90deg);
+        }
+
+        .analysis-modal-body {
+            padding: 30px;
+            color: #c0c0d0;
+        }
+
+        .analysis-section {
+            margin-bottom: 30px;
+            background: rgba(0, 212, 255, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .analysis-section h3 {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            margin: 0 0 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-box {
+            background: rgba(10, 14, 39, 0.6);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .stat-box:hover {
+            border-color: rgba(0, 212, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #a0a0b0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary-color);
+        }
+
+        .line-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .line-stat-card {
+            background: rgba(10, 14, 39, 0.6);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .line-stat-header {
+            background: linear-gradient(135deg, #00d4ff 0%, #6c5ce7 100%);
+            color: #0a0e27;
+            padding: 10px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .line-stat-content {
+            padding: 12px;
+        }
+
+        .line-stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .line-stat-item strong {
+            color: var(--secondary-color);
+        }
+
+        .insights-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .insight-item {
+            background: rgba(10, 14, 39, 0.6);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid;
+            display: flex;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .insight-item:hover {
+            transform: translateX(5px);
+        }
+
+        .insight-item i {
+            font-size: 1.5rem;
+            min-width: 30px;
+        }
+
+        .insight-item.success {
+            border-left-color: var(--secondary-color);
+        }
+
+        .insight-item.success i {
+            color: var(--secondary-color);
+        }
+
+        .insight-item.warning {
+            border-left-color: var(--warning-color);
+        }
+
+        .insight-item.warning i {
+            color: var(--warning-color);
+        }
+
+        .insight-item.info {
+            border-left-color: var(--primary-color);
+        }
+
+        .insight-item.info i {
+            color: var(--primary-color);
+        }
+
+        .insight-item.primary {
+            border-left-color: var(--secondary-color);
+        }
+
+        .insight-item.primary i {
+            color: var(--secondary-color);
+        }
+
+        .insight-item strong {
+            color: white;
+            display: block;
+        }
+
+        .recommendation-box {
+            background: rgba(10, 14, 39, 0.8);
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .recommendation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .recommendation-header strong {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-optimal {
+            background-color: rgba(0, 255, 136, 0.2);
+            color: var(--secondary-color);
+            border: 1px solid rgba(0, 255, 136, 0.4);
+        }
+
+        .status-acceptable {
+            background-color: rgba(255, 165, 2, 0.2);
+            color: var(--warning-color);
+            border: 1px solid rgba(255, 165, 2, 0.4);
+        }
+
+        .status-critical {
+            background-color: rgba(255, 0, 110, 0.2);
+            color: var(--danger-color);
+            border: 1px solid rgba(255, 0, 110, 0.4);
+        }
+
+        .recommendation-text p {
+            margin: 10px 0;
+            line-height: 1.6;
+            color: #c0c0d0;
+        }
+
+        .recommendation-text strong {
+            color: white;
+        }
+
+        .recommendation-detail {
+            color: #a0a0b0;
+            font-style: italic;
+            padding: 10px;
+            background: rgba(0, 212, 255, 0.05);
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .period-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .period-item {
+            background: rgba(10, 14, 39, 0.6);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .period-item span {
+            display: block;
+            font-size: 0.8rem;
+            color: #a0a0b0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .period-item strong {
+            font-size: 1.3rem;
+            color: var(--primary-color);
+        }
+
+        .analysis-modal-footer {
+            display: flex;
+            gap: 12px;
+            padding: 20px;
+            border-top: 2px solid rgba(0, 212, 255, 0.2);
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 0 0 18px 18px;
+            justify-content: flex-end;
+        }
+
+        .btn-modal-action {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);
+            color: #0a0e27;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-modal-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-modal-close {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--primary-color);
+            padding: 12px 24px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-modal-close:hover {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: rgba(0, 212, 255, 0.5);
+        }
+
+        /* Scroll personalizado en el modal */
+        .analysis-modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .analysis-modal-content::-webkit-scrollbar-track {
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .analysis-modal-content::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #00d4ff 0%, #6c5ce7 100%);
+            border-radius: 4px;
+        }
+
+        .analysis-modal-content::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #00ffff 0%, #a29bfe 100%);
+        }
     </style>
     </style>
 </head>
@@ -1126,9 +1525,18 @@
                     generateAIInsights();
                     showAlert(`${allData.length} registros cargados exitosamente`, 'success');
                     
-                    // Scroll al dashboard
-                    document.querySelector('.section-title').scrollIntoView({ behavior: 'smooth' });
+                    // Generar y mostrar resumen de análisis
+                    generateAnalysisSummary();
+                    
+                    // Scroll seguro al dashboard
+                    setTimeout(() => {
+                        const element = document.querySelector('.section-title');
+                        if (element) {
+                            element.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    }, 500);
                 } catch (error) {
+                    console.error('Error detallado:', error);
                     showAlert('Error al procesar el archivo: ' + error.message, 'danger');
                 }
             };
@@ -1672,6 +2080,248 @@
                 efficiencyStatus: parseFloat(avgOEE) >= 85 ? '✓ Óptima' : parseFloat(avgOEE) >= 70 ? '⊕ Aceptable' : '✗ Crítica',
                 trend: trend
             };
+        }
+
+        // Generar resumen de análisis detallado
+        function generateAnalysisSummary() {
+            const analysis = analyzeData(filteredData);
+            
+            // Calcular estadísticas adicionales
+            const lines = ['Linea A', 'Linea B', 'Linea C'];
+            const turnoStats = {};
+            
+            lines.forEach(line => {
+                const lineData = filteredData.filter(row => row.linea === line);
+                const mañanaData = lineData.filter(row => row.turno === 'Mañana');
+                const tardeData = lineData.filter(row => row.turno === 'Tarde');
+                
+                turnoStats[line] = {
+                    mañana: mañanaData.length > 0 ? (mañanaData.reduce((s, r) => s + parseFloat(r.eficiencia_oee), 0) / mañanaData.length).toFixed(1) : '--',
+                    tarde: tardeData.length > 0 ? (tardeData.reduce((s, r) => s + parseFloat(r.eficiencia_oee), 0) / tardeData.length).toFixed(1) : '--'
+                };
+            });
+
+            const totalProduction = filteredData.reduce((sum, row) => sum + parseInt(row.unidades_producidas), 0);
+            const totalDefects = filteredData.reduce((sum, row) => sum + parseInt(row.unidades_defectuosas), 0);
+            const totalDowntime = filteredData.reduce((sum, row) => sum + parseInt(row.tiempo_parada_min), 0);
+            const avgOEE = (filteredData.reduce((sum, row) => sum + parseFloat(row.eficiencia_oee), 0) / filteredData.length).toFixed(1);
+
+            // Generar HTML del modal
+            const modalHTML = `
+                <div class="analysis-modal" id="analysisModal">
+                    <div class="analysis-modal-content">
+                        <div class="analysis-modal-header">
+                            <h2><i class="fas fa-brain"></i> Resumen de Análisis Inteligente</h2>
+                            <button class="close-modal" onclick="closeAnalysisModal()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+
+                        <div class="analysis-modal-body">
+                            <!-- Estadísticas Generales -->
+                            <div class="analysis-section">
+                                <h3><i class="fas fa-chart-pie"></i> Estadísticas Generales</h3>
+                                <div class="stats-grid">
+                                    <div class="stat-box">
+                                        <div class="stat-icon" style="background: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);">
+                                            <i class="fas fa-database"></i>
+                                        </div>
+                                        <div class="stat-label">Registros Analizados</div>
+                                        <div class="stat-value">${filteredData.length}</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="stat-icon" style="background: linear-gradient(135deg, #00ff88 0%, #00d4ff 100%);">
+                                            <i class="fas fa-boxes"></i>
+                                        </div>
+                                        <div class="stat-label">Unidades Producidas</div>
+                                        <div class="stat-value">${totalProduction.toLocaleString()}</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="stat-icon" style="background: linear-gradient(135deg, #ff006e 0%, #ffa502 100%);">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </div>
+                                        <div class="stat-label">Defectos Detectados</div>
+                                        <div class="stat-value">${totalDefects}</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="stat-icon" style="background: linear-gradient(135deg, #ffa502 0%, #ff006e 100%);">
+                                            <i class="fas fa-clock"></i>
+                                        </div>
+                                        <div class="stat-label">Tiempo Parada Total</div>
+                                        <div class="stat-value">${totalDowntime} min</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Performance por Línea -->
+                            <div class="analysis-section">
+                                <h3><i class="fas fa-industry"></i> Desempeño por Línea de Producción</h3>
+                                <div class="line-stats">
+                                    ${lines.map(line => `
+                                        <div class="line-stat-card">
+                                            <div class="line-stat-header">${line}</div>
+                                            <div class="line-stat-content">
+                                                <div class="line-stat-item">
+                                                    <span>OEE Mañana:</span>
+                                                    <strong>${turnoStats[line].mañana}%</strong>
+                                                </div>
+                                                <div class="line-stat-item">
+                                                    <span>OEE Tarde:</span>
+                                                    <strong>${turnoStats[line].tarde}%</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+
+                            <!-- Insights Principales -->
+                            <div class="analysis-section">
+                                <h3><i class="fas fa-lightbulb"></i> Insights Principales</h3>
+                                <div class="insights-list">
+                                    <div class="insight-item success">
+                                        <i class="fas fa-trophy"></i>
+                                        <div>
+                                            <strong>Mejor Línea:</strong>
+                                            <span>${analysis.bestLine} con OEE de ${analysis.bestLineOEE}%</span>
+                                        </div>
+                                    </div>
+                                    <div class="insight-item warning">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        <div>
+                                            <strong>Área de Mejora:</strong>
+                                            <span>${analysis.worstLine} requiere atención (OEE: ${analysis.worstLineOEE}%)</span>
+                                        </div>
+                                    </div>
+                                    <div class="insight-item info">
+                                        <i class="fas fa-percent"></i>
+                                        <div>
+                                            <strong>Tasa de Defectos:</strong>
+                                            <span>${analysis.defectRate} - ${analysis.defectTrend}</span>
+                                        </div>
+                                    </div>
+                                    <div class="insight-item primary">
+                                        <i class="fas fa-arrow-trend-up"></i>
+                                        <div>
+                                            <strong>Tendencia:</strong>
+                                            <span>${analysis.trend}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Recomendaciones -->
+                            <div class="analysis-section">
+                                <h3><i class="fas fa-magic"></i> Recomendaciones de IA</h3>
+                                <div class="recommendation-box">
+                                    <div class="recommendation-header">
+                                        <strong>OEE Promedio: ${avgOEE}%</strong>
+                                        <span class="status-badge ${parseFloat(avgOEE) >= 85 ? 'status-optimal' : parseFloat(avgOEE) >= 70 ? 'status-acceptable' : 'status-critical'}">
+                                            ${analysis.efficiencyStatus}
+                                        </span>
+                                    </div>
+                                    <div class="recommendation-text">
+                                        <p><strong>Acción Recomendada:</strong> ${analysis.recommendation}</p>
+                                        <p class="recommendation-detail">
+                                            ${getDetailedRecommendation(analysis, avgOEE)}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Período de Análisis -->
+                            <div class="analysis-section">
+                                <h3><i class="fas fa-calendar-alt"></i> Período de Análisis</h3>
+                                <div class="period-info">
+                                    <div class="period-item">
+                                        <span>Fecha Inicio:</span>
+                                        <strong>${[...new Set(filteredData.map(r => r.fecha))].sort()[0]}</strong>
+                                    </div>
+                                    <div class="period-item">
+                                        <span>Fecha Fin:</span>
+                                        <strong>${[...new Set(filteredData.map(r => r.fecha))].sort().reverse()[0]}</strong>
+                                    </div>
+                                    <div class="period-item">
+                                        <span>Días Analizados:</span>
+                                        <strong>${[...new Set(filteredData.map(r => r.fecha))].length}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="analysis-modal-footer">
+                            <button class="btn-modal-action" onclick="exportAnalysisToPDF()">
+                                <i class="fas fa-file-pdf"></i> Exportar Análisis
+                            </button>
+                            <button class="btn-modal-close" onclick="closeAnalysisModal()">
+                                <i class="fas fa-times"></i> Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Inyectar modal en el DOM
+            let existingModal = document.getElementById('analysisModal');
+            if (existingModal) existingModal.remove();
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // Mostrar con animación
+            setTimeout(() => {
+                document.getElementById('analysisModal').classList.add('show');
+            }, 10);
+        }
+
+        // Función para generar recomendaciones detalladas
+        function getDetailedRecommendation(analysis, avgOEE) {
+            let detail = '';
+            
+            if (parseFloat(avgOEE) >= 90) {
+                detail = 'El desempeño es excelente. Mantén los estándares actuales y considera documentar las mejores prácticas implementadas.';
+            } else if (parseFloat(avgOEE) >= 85) {
+                detail = 'Desempeño bueno. Enfoca esfuerzos en ' + analysis.worstLine + ' para llevarla al nivel de ' + analysis.bestLine + '.';
+            } else if (parseFloat(avgOEE) >= 70) {
+                detail = 'Desempeño aceptable pero requiere mejora. Analiza los tiempos de parada y defectos en ' + analysis.worstLine + '.';
+            } else {
+                detail = 'Situación crítica. Intervención inmediata requerida en ' + analysis.worstLine + '. Revisa especialmente los tiempos de parada.';
+            }
+            
+            return detail;
+        }
+
+        // Cerrar modal de análisis
+        function closeAnalysisModal() {
+            const modal = document.getElementById('analysisModal');
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => modal.remove(), 300);
+            }
+        }
+
+        // Exportar análisis a PDF
+        function exportAnalysisToPDF() {
+            const element = document.querySelector('.analysis-modal-content');
+            if (!element) return;
+
+            const opt = {
+                margin: 15,
+                filename: `Analisis_OEE_${new Date().toISOString().split('T')[0]}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+            };
+
+            html2pdf()
+                .set(opt)
+                .from(element)
+                .save()
+                .then(() => {
+                    showAlert('Análisis exportado a PDF exitosamente', 'success');
+                })
+                .catch((error) => {
+                    showAlert('Error al generar PDF: ' + error.message, 'danger');
+                });
         }
 
         // Exportar a CSV
