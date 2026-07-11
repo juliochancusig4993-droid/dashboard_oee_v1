@@ -1510,6 +1510,42 @@
             return canvas ? canvas.getContext('2d') : null;
         }
 
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function updateFilterOptions() {
+            const filterLinea = getElement('filterLinea');
+            const filterTurno = getElement('filterTurno');
+            if (!filterLinea || !filterTurno) return;
+
+            const currentLinea = filterLinea.value;
+            const currentTurno = filterTurno.value;
+
+            const lineas = [...new Set(allData.map(row => String(row.linea || '').trim()).filter(Boolean))].sort();
+            const turnos = [...new Set(allData.map(row => String(row.turno || '').trim()).filter(Boolean))].sort();
+
+            filterLinea.innerHTML = `<option value="">Todas las líneas</option>${lineas.map(linea => `<option value="${escapeHtml(linea)}">${escapeHtml(linea)}</option>`).join('')}`;
+            filterTurno.innerHTML = `<option value="">Todos los turnos</option>${turnos.map(turno => `<option value="${escapeHtml(turno)}">${escapeHtml(turno)}</option>`).join('')}`;
+
+            if (lineas.includes(currentLinea)) {
+                filterLinea.value = currentLinea;
+            } else {
+                filterLinea.value = '';
+            }
+
+            if (turnos.includes(currentTurno)) {
+                filterTurno.value = currentTurno;
+            } else {
+                filterTurno.value = '';
+            }
+        }
+
         // Cargar datos del CSV
         async function loadData() {
             try {
@@ -1522,6 +1558,7 @@
                 allData = parseCSV(csvText);
                 filteredData = [...allData];
                 initializeFilters();
+                updateFilterOptions();
                 renderDashboard();
                 generateAIInsights();
             } catch (error) {
@@ -1540,6 +1577,7 @@
                 try {
                     const csvText = e.target.result;
                     allData = parseCSV(csvText);
+                    updateFilterOptions();
                     
                     if (allData.length === 0) {
                         filteredData = [];
@@ -1662,6 +1700,8 @@
                 filterTurno.removeEventListener('change', applyFilters);
                 filterTurno.addEventListener('change', applyFilters);
             }
+
+            updateFilterOptions();
         }
 
         // Aplicar filtros
@@ -1687,6 +1727,7 @@
 
             if (filterLinea) filterLinea.value = '';
             if (filterTurno) filterTurno.value = '';
+            updateFilterOptions();
             filteredData = [...allData];
             renderDashboard();
         }
