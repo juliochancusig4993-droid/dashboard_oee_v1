@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard OEE - Monitoreo de Producción</title>
+    <title>Dashboard OEE Avanzado - Monitoreo Inteligente de Producción</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -22,16 +22,28 @@
     <!-- jsPDF y html2canvas para exportación -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
+    <!-- Animate.css -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    
     <!-- Custom CSS -->
     <style>
         :root {
-            --primary-color: #1a73e8;
-            --secondary-color: #34a853;
-            --danger-color: #ea4335;
-            --warning-color: #fbbc04;
-            --dark-color: #202124;
+            --primary-color: #00d4ff;
+            --secondary-color: #00ff88;
+            --success-color: #00ff88;
+            --danger-color: #ff006e;
+            --warning-color: #ffa502;
+            --info-color: #00d4ff;
+            --dark-color: #0a0e27;
             --light-color: #f8f9fa;
-            --border-color: #dadce0;
+            --border-color: #1a1f3a;
+            --accent-color: #6c5ce7;
+            --darker-color: #050810;
+            --gradient-primary: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);
+            --gradient-secondary: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+            --gradient-accent: linear-gradient(135deg, #00ff88 0%, #00d4ff 100%);
+            --shadow-dark: 0 8px 32px rgba(0, 212, 255, 0.15);
+            --shadow-neon: 0 0 20px rgba(0, 212, 255, 0.5);
         }
 
         * {
@@ -40,66 +52,111 @@
             box-sizing: border-box;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', 'Roboto', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #050810 0%, #0a0e27 50%, #0f1335 100%);
+            background-attachment: fixed;
             min-height: 100vh;
             padding: 20px 0;
+            color: #e0e0e0;
         }
 
         .navbar-custom {
-            background: linear-gradient(90deg, var(--primary-color) 0%, #1557b0 100%);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(90deg, #0a0e27 0%, #0f1335 50%, #1a1f3a 100%);
+            box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2), inset 0 1px 0 rgba(0, 212, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(0, 212, 255, 0.4);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
         .navbar-brand {
-            font-weight: 700;
-            font-size: 1.5rem;
+            font-weight: 800;
+            font-size: 1.8rem;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            letter-spacing: 0.5px;
+            color: var(--primary-color);
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
         }
 
         .navbar-brand i {
             color: var(--warning-color);
+            font-size: 2rem;
+            text-shadow: 0 0 10px rgba(255, 165, 2, 0.5);
         }
 
         .container-dashboard {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 30px auto;
             padding: 0 15px;
         }
 
         .section-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--dark-color);
-            margin: 30px 0 20px 0;
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin: 40px 0 25px 0;
             display: flex;
             align-items: center;
-            gap: 10px;
-            border-left: 5px solid var(--primary-color);
-            padding-left: 15px;
+            gap: 15px;
+            border-left: 6px solid var(--secondary-color);
+            padding-left: 20px;
+            text-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
         }
 
-        /* KPI Cards */
+        .section-subtitle {
+            font-size: 0.9rem;
+            color: rgba(0, 212, 255, 0.8);
+            font-weight: 400;
+            margin-left: 8px;
+        }
+
+        /* KPI Cards - Diseño Premium */
         .kpi-card {
-            background: white;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            border-top: 4px solid var(--primary-color);
-            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #0f1335 0%, #1a1f3a 100%);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 212, 255, 0.1), inset 0 1px 0 rgba(0, 212, 255, 0.1);
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            border-top: 3px solid var(--primary-color);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
         }
 
         .kpi-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 16px 48px rgba(0, 212, 255, 0.25), inset 0 1px 0 rgba(0, 212, 255, 0.2);
+            border-color: rgba(0, 212, 255, 0.4);
+        }
+
+        .kpi-card:hover::before {
+            opacity: 1;
         }
 
         .kpi-card.success {
-            border-top-color: var(--secondary-color);
+            border-top-color: var(--success-color);
         }
 
         .kpi-card.danger {
@@ -110,276 +167,509 @@
             border-top-color: var(--warning-color);
         }
 
+        .kpi-card.info {
+            border-top-color: var(--info-color);
+        }
+
         .kpi-icon {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            display: inline-block;
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.15) 0%, rgba(0, 255, 136, 0.15) 100%);
+            transition: all 0.3s ease;
+            border: 2px solid rgba(0, 212, 255, 0.3);
         }
 
         .kpi-card.success .kpi-icon {
-            color: var(--secondary-color);
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.15) 0%, rgba(0, 212, 255, 0.15) 100%);
+            color: var(--success-color);
+            border-color: rgba(0, 255, 136, 0.3);
         }
 
         .kpi-card.danger .kpi-icon {
+            background: linear-gradient(135deg, rgba(255, 0, 110, 0.15) 0%, rgba(255, 165, 2, 0.15) 100%);
             color: var(--danger-color);
+            border-color: rgba(255, 0, 110, 0.3);
         }
 
         .kpi-card.warning .kpi-icon {
+            background: linear-gradient(135deg, rgba(255, 165, 2, 0.15) 0%, rgba(255, 0, 110, 0.15) 100%);
             color: var(--warning-color);
+            border-color: rgba(255, 165, 2, 0.3);
         }
 
-        .kpi-card.primary .kpi-icon {
-            color: var(--primary-color);
+        .kpi-card.info .kpi-icon {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.15) 0%, rgba(0, 255, 136, 0.15) 100%);
+            color: var(--info-color);
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        .kpi-card:hover .kpi-icon {
+            transform: scale(1.15) rotate(10deg);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
         }
 
         .kpi-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--dark-color);
-            margin: 10px 0;
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin: 15px 0;
+            letter-spacing: -1px;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
         }
 
         .kpi-label {
-            font-size: 0.95rem;
-            color: #5f6368;
+            font-size: 0.85rem;
+            color: #a0a0b0;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 500;
+            letter-spacing: 1px;
+            font-weight: 600;
         }
 
         .kpi-change {
-            font-size: 0.85rem;
-            margin-top: 10px;
-            padding: 5px 10px;
-            border-radius: 5px;
+            font-size: 0.8rem;
+            margin-top: 15px;
+            padding: 8px 12px;
+            border-radius: 8px;
             display: inline-block;
+            font-weight: 600;
         }
 
         .kpi-change.positive {
-            background-color: #e6f4ea;
-            color: #137333;
+            background-color: rgba(0, 255, 136, 0.2);
+            color: var(--success-color);
+            border: 1px solid rgba(0, 255, 136, 0.4);
         }
 
         .kpi-change.negative {
-            background-color: #fce8e6;
-            color: #c5221f;
+            background-color: rgba(255, 0, 110, 0.2);
+            color: var(--danger-color);
+            border: 1px solid rgba(255, 0, 110, 0.4);
         }
 
         /* Chart Cards */
         .chart-card {
-            background: white;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, #0f1335 0%, #1a1f3a 100%);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 212, 255, 0.1), inset 0 1px 0 rgba(0, 212, 255, 0.1);
             margin-bottom: 30px;
             transition: all 0.3s ease;
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            border-left: 5px solid var(--primary-color);
         }
 
         .chart-card:hover {
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 12px 48px rgba(0, 212, 255, 0.2), inset 0 1px 0 rgba(0, 212, 255, 0.1);
+            transform: translateY(-3px);
+            border-color: rgba(0, 212, 255, 0.4);
         }
 
         .chart-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             padding-bottom: 15px;
-            border-bottom: 2px solid var(--light-color);
+            border-bottom: 2px solid rgba(0, 212, 255, 0.2);
         }
 
         .chart-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: var(--dark-color);
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary-color);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
         }
 
         .chart-title i {
-            color: var(--primary-color);
+            color: var(--secondary-color);
+            font-size: 1.5rem;
         }
 
         .chart-container {
             position: relative;
-            height: 300px;
+            height: 350px;
         }
 
         /* Controles y Filtros */
         .controls-section {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
+            background: linear-gradient(135deg, #0f1335 0%, #1a1f3a 100%);
+            border-radius: 15px;
+            padding: 25px;
             margin-bottom: 30px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 212, 255, 0.1), inset 0 1px 0 rgba(0, 212, 255, 0.1);
             display: flex;
             gap: 15px;
             flex-wrap: wrap;
             align-items: center;
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            border-left: 5px solid var(--secondary-color);
         }
 
         .filter-group {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             align-items: center;
         }
 
         .filter-label {
-            font-weight: 600;
-            color: var(--dark-color);
-            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .filter-select {
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
+            padding: 10px 15px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
             font-size: 0.9rem;
-            background-color: white;
+            background-color: rgba(15, 19, 53, 0.8);
             cursor: pointer;
             transition: all 0.3s ease;
+            font-weight: 500;
+            color: var(--primary-color);
         }
 
         .filter-select:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+            box-shadow: 0 0 0 4px rgba(0, 212, 255, 0.15);
+            background-color: rgba(15, 19, 53, 0.95);
         }
 
         .btn-custom {
-            padding: 10px 20px;
+            padding: 11px 22px;
             border: none;
-            border-radius: 5px;
-            font-weight: 600;
+            border-radius: 8px;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .btn-primary-custom {
-            background-color: var(--primary-color);
-            color: white;
+            background: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);
+            color: #0a0e27;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            font-weight: 700;
+            border: 1px solid rgba(0, 212, 255, 0.5);
         }
 
         .btn-primary-custom:hover {
-            background-color: #1557b0;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0, 212, 255, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            border-color: rgba(0, 212, 255, 0.8);
         }
 
         .btn-success-custom {
-            background-color: var(--secondary-color);
-            color: white;
+            background: linear-gradient(135deg, #00ff88 0%, #00d4ff 100%);
+            color: #0a0e27;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            font-weight: 700;
+            border: 1px solid rgba(0, 255, 136, 0.5);
         }
 
         .btn-success-custom:hover {
-            background-color: #2d894d;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(52, 168, 83, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0, 255, 136, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            border-color: rgba(0, 255, 136, 0.8);
         }
 
         .btn-danger-custom {
-            background-color: var(--danger-color);
+            background: linear-gradient(135deg, #ff006e 0%, #ffa502 100%);
             color: white;
+            box-shadow: 0 0 20px rgba(255, 0, 110, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            font-weight: 700;
+            border: 1px solid rgba(255, 0, 110, 0.5);
         }
 
         .btn-danger-custom:hover {
-            background-color: #d33227;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(234, 67, 53, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(255, 0, 110, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 0, 110, 0.8);
         }
 
         .btn-group-custom {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             margin-left: auto;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            background: linear-gradient(135deg, #6c5ce7 0%, #00d4ff 100%);
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(108, 92, 231, 0.3);
+            color: white;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        .upload-section:hover {
+            border-color: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 12px 48px rgba(108, 92, 231, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .upload-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .upload-description {
+            font-size: 0.95rem;
+            opacity: 0.95;
+            margin-bottom: 25px;
+        }
+
+        #csvInput {
+            display: none;
+        }
+
+        .upload-btn-custom {
+            background: white;
+            color: #667eea;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: inline-flex;
+            gap: 8px;
+        }
+
+        .upload-btn-custom:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        /* AI Analysis Section */
+        .ai-analysis-card {
+            background: linear-gradient(135deg, #ff006e 0%, #ffa502 100%);
+            border-radius: 15px;
+            padding: 30px;
+            color: white;
+            box-shadow: 0 8px 32px rgba(255, 0, 110, 0.3);
+            margin-bottom: 30px;
+            border-left: 5px solid #ffa502;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ai-analysis-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        .ai-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .ai-icon {
+            font-size: 2.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ai-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        .ai-insights {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .insight-box {
+            background: rgba(255, 255, 255, 0.15);
+            border-left: 4px solid white;
+            padding: 15px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .insight-box:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateX(5px);
+        }
+
+        .insight-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+        }
+
+        .insight-value {
+            font-size: 1.3rem;
+            font-weight: 800;
         }
 
         /* Data Table */
         .table-responsive {
-            border-radius: 10px;
+            border-radius: 15px;
             overflow: hidden;
         }
 
         .datatable-card {
-            background: white;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, #0f1335 0%, #1a1f3a 100%);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 212, 255, 0.1), inset 0 1px 0 rgba(0, 212, 255, 0.1);
             overflow-x: auto;
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            border-left: 5px solid var(--primary-color);
         }
 
         table.dataTable thead th {
-            background-color: var(--primary-color);
-            color: white;
-            font-weight: 600;
+            background: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);
+            color: #0a0e27;
+            font-weight: 700;
             border-bottom: none;
-            padding: 15px;
+            padding: 18px;
             text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
         }
 
         table.dataTable tbody td {
-            padding: 12px 15px;
+            padding: 15px 18px;
             vertical-align: middle;
             text-align: center;
+            font-weight: 500;
+            color: #c0c0d0;
+        }
+
+        table.dataTable tbody tr {
+            transition: all 0.2s ease;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
         }
 
         table.dataTable tbody tr:hover {
-            background-color: #f0f7ff;
+            background-color: rgba(0, 212, 255, 0.1);
+            box-shadow: inset 0 0 10px rgba(0, 212, 255, 0.2);
         }
 
         .dataTables_wrapper .dataTables_paginate .paginate_button {
-            padding: 8px 12px;
-            margin: 0 3px;
-            border-radius: 5px;
-            border: 1px solid var(--border-color);
+            padding: 10px 14px;
+            margin: 0 4px;
+            border-radius: 6px;
+            border: 2px solid var(--border-color);
             cursor: pointer;
             transition: all 0.3s ease;
+            font-weight: 600;
         }
 
         .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
             border-color: var(--primary-color);
             color: white;
         }
 
         .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
             border-color: var(--primary-color);
             color: white;
         }
 
         /* Footer */
         .footer {
-            background: var(--dark-color);
-            color: #bdc1c6;
+            background: linear-gradient(90deg, #050810 0%, #0a0e27 100%);
+            color: #a0a0b0;
             text-align: center;
-            padding: 20px;
-            margin-top: 50px;
+            padding: 30px;
+            margin-top: 60px;
             border-top: 3px solid var(--primary-color);
+            box-shadow: 0 -8px 32px rgba(0, 212, 255, 0.15);
         }
 
         .footer p {
             margin: 0;
             font-size: 0.9rem;
+            font-weight: 500;
         }
 
         /* Responsive */
         @media (max-width: 768px) {
+            .section-title {
+                font-size: 1.5rem;
+                margin: 25px 0 15px 0;
+                padding-left: 15px;
+            }
+
             .kpi-card {
-                padding: 15px;
+                padding: 20px;
             }
 
             .kpi-value {
-                font-size: 1.8rem;
+                font-size: 2rem;
             }
 
             .kpi-icon {
-                font-size: 1.8rem;
+                font-size: 2rem;
+                width: 60px;
+                height: 60px;
             }
 
             .controls-section {
@@ -394,41 +684,158 @@
             .btn-group-custom {
                 margin-left: 0;
                 justify-content: center;
+                flex-wrap: wrap;
             }
 
             .chart-container {
                 height: 250px;
             }
+
+            .upload-section {
+                padding: 25px;
+            }
+
+            .ai-insights {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-card {
+                padding: 20px;
+            }
+
+            .datatable-card {
+                padding: 15px;
+            }
+
+            table.dataTable thead th {
+                padding: 12px;
+                font-size: 0.75rem;
+            }
+
+            table.dataTable tbody td {
+                padding: 10px;
+                font-size: 0.85rem;
+            }
         }
 
-        /* Loading */
+        /* Loading & Alerts */
         .spinner {
             display: none;
             text-align: center;
-            padding: 20px;
+            padding: 30px;
         }
 
         .spinner.active {
             display: block;
         }
 
-        /* Alert Styles */
         .alert-custom {
             border-radius: 10px;
             border: none;
-            padding: 15px 20px;
+            padding: 18px 22px;
             margin-bottom: 20px;
+            border-left: 5px solid;
+            font-weight: 600;
         }
 
         .alert-success-custom {
-            background-color: #e6f4ea;
-            color: #137333;
+            background-color: #d5f4e6;
+            color: #27ae60;
+            border-left-color: #27ae60;
+        }
+
+        .alert-danger-custom {
+            background-color: #fadbd8;
+            color: #c0392b;
+            border-left-color: #c0392b;
         }
 
         .alert-warning-custom {
-            background-color: #fef7e0;
-            color: #7d6608;
+            background-color: #fef5e7;
+            color: #d68910;
+            border-left-color: #d68910;
         }
+
+        .alert-info-custom {
+            background-color: #d6eaf8;
+            color: #1f618d;
+            border-left-color: #1f618d;
+        }
+
+        /* Modal Styles */
+        .modal-content {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            color: white;
+            border-bottom: none;
+            border-radius: 15px 15px 0 0;
+            font-weight: 700;
+        }
+
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+
+        /* Badge Styles */
+        .badge-custom {
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-success {
+            background-color: #d5f4e6;
+            color: #27ae60;
+        }
+
+        .badge-danger {
+            background-color: #fadbd8;
+            color: #c0392b;
+        }
+
+        .badge-warning {
+            background-color: #fef5e7;
+            color: #d68910;
+        }
+
+        /* Animaciones */
+        .animate-in {
+            animation: slideInUp 0.5s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+    </style>
     </style>
 </head>
 <body>
@@ -482,6 +889,40 @@
                 <button class="btn-custom btn-primary-custom" onclick="window.print()">
                     <i class="fas fa-print"></i> Imprimir
                 </button>
+            </div>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="upload-section">
+            <div style="position: relative; z-index: 1;">
+                <div class="upload-title">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    Carga de Datos
+                </div>
+                <div class="upload-description">
+                    Sube un archivo CSV con la misma estructura para analizar nuevos datos
+                </div>
+                <input type="file" id="csvInput" accept=".csv" onchange="handleFileUpload(event)">
+                <button class="upload-btn-custom" onclick="document.getElementById('csvInput').click()">
+                    <i class="fas fa-folder-open"></i>
+                    Seleccionar Archivo CSV
+                </button>
+            </div>
+        </div>
+
+        <!-- AI Analysis Section -->
+        <div class="ai-analysis-card">
+            <div class="ai-header">
+                <div class="ai-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <div class="ai-title">Análisis Inteligente</div>
+            </div>
+            <div class="ai-insights" id="aiInsights">
+                <div class="insight-box">
+                    <div class="insight-label">Cargando análisis...</div>
+                    <div class="insight-value">--</div>
+                </div>
             </div>
         </div>
 
@@ -655,10 +1096,43 @@
                 parseCSV(csvText);
                 initializeFilters();
                 renderDashboard();
+                generateAIInsights();
             } catch (error) {
                 console.error('Error cargando datos:', error);
-                alert('Error al cargar los datos del CSV');
+                showAlert('Error al cargar los datos del CSV', 'danger');
             }
+        }
+
+        // Manejar carga de archivos
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const csvText = e.target.result;
+                    allData = [];
+                    parseCSV(csvText);
+                    
+                    if (allData.length === 0) {
+                        showAlert('El archivo CSV está vacío o no tiene el formato correcto', 'warning');
+                        return;
+                    }
+
+                    filteredData = [...allData];
+                    resetFilters();
+                    renderDashboard();
+                    generateAIInsights();
+                    showAlert(`${allData.length} registros cargados exitosamente`, 'success');
+                    
+                    // Scroll al dashboard
+                    document.querySelector('.section-title').scrollIntoView({ behavior: 'smooth' });
+                } catch (error) {
+                    showAlert('Error al procesar el archivo: ' + error.message, 'danger');
+                }
+            };
+            reader.readAsText(file);
         }
 
         // Parsear CSV
@@ -796,25 +1270,37 @@
                     datasets: [{
                         label: 'OEE (%)',
                         data: oeeByDate,
-                        borderColor: '#1a73e8',
-                        backgroundColor: 'rgba(26, 115, 232, 0.1)',
+                        borderColor: '#00d4ff',
+                        backgroundColor: 'rgba(0, 212, 255, 0.15)',
                         borderWidth: 3,
                         fill: true,
                         tension: 0.4,
                         pointRadius: 6,
-                        pointBackgroundColor: '#1a73e8',
-                        pointBorderColor: 'white',
-                        pointBorderWidth: 2
+                        pointBackgroundColor: '#00d4ff',
+                        pointBorderColor: '#0a0e27',
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 8,
+                        pointHoverBorderWidth: 3,
+                        pointHoverBorderColor: '#00ff88'
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: true, labels: { usePointStyle: true, padding: 20 } }
+                        legend: { display: true, labels: { usePointStyle: true, padding: 20, color: '#c0c0d0' } }
                     },
                     scales: {
-                        y: { min: 0, max: 100, ticks: { callback: v => v + '%' } }
+                        y: { 
+                            min: 0, 
+                            max: 100,
+                            grid: { color: 'rgba(0, 212, 255, 0.1)' },
+                            ticks: { callback: v => v + '%', color: '#c0c0d0' }
+                        },
+                        x: {
+                            grid: { color: 'rgba(0, 212, 255, 0.05)' },
+                            ticks: { color: '#c0c0d0' }
+                        }
                     }
                 }
             });
@@ -828,7 +1314,7 @@
                 return rowsByLine.length > 0 ? (rowsByLine.reduce((sum, row) => sum + parseFloat(row.eficiencia_oee), 0) / rowsByLine.length).toFixed(1) : 0;
             });
 
-            const colors = ['#1a73e8', '#34a853', '#ea4335'];
+            const colors = ['#00d4ff', '#00ff88', '#ffa502'];
 
             const ctx = document.getElementById('chartOEEByLine').getContext('2d');
             charts.oeeByLine = new Chart(ctx, {
@@ -840,7 +1326,8 @@
                         data: oeeByLine,
                         backgroundColor: colors,
                         borderRadius: 8,
-                        borderWidth: 0
+                        borderWidth: 0,
+                        hoverBackgroundColor: ['#00ffff', '#00ffaa', '#ffb500']
                     }]
                 },
                 options: {
@@ -848,10 +1335,19 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: true, labels: { usePointStyle: true, padding: 20 } }
+                        legend: { display: true, labels: { usePointStyle: true, padding: 20, color: '#c0c0d0' } }
                     },
                     scales: {
-                        y: { min: 0, max: 100, ticks: { callback: v => v + '%' } }
+                        y: { 
+                            min: 0, 
+                            max: 100,
+                            grid: { color: 'rgba(0, 212, 255, 0.1)' },
+                            ticks: { callback: v => v + '%', color: '#c0c0d0' }
+                        },
+                        x: {
+                            grid: { color: 'rgba(0, 212, 255, 0.05)' },
+                            ticks: { color: '#c0c0d0' }
+                        }
                     }
                 }
             });
@@ -873,16 +1369,27 @@
                     datasets: [{
                         label: 'Unidades Defectuosas',
                         data: defectsByLine,
-                        backgroundColor: '#ea4335',
+                        backgroundColor: '#ff006e',
                         borderRadius: 8,
-                        borderWidth: 0
+                        borderWidth: 0,
+                        hoverBackgroundColor: '#ff3385'
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: true, labels: { usePointStyle: true, padding: 20 } }
+                        legend: { display: true, labels: { usePointStyle: true, padding: 20, color: '#c0c0d0' } }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(255, 0, 110, 0.1)' },
+                            ticks: { color: '#c0c0d0' }
+                        },
+                        x: {
+                            grid: { color: 'rgba(255, 0, 110, 0.05)' },
+                            ticks: { color: '#c0c0d0' }
+                        }
                     }
                 }
             });
@@ -904,16 +1411,27 @@
                     datasets: [{
                         label: 'Tiempo de Parada (min)',
                         data: downtimeByLine,
-                        backgroundColor: '#fbbc04',
+                        backgroundColor: '#ffa502',
                         borderRadius: 8,
-                        borderWidth: 0
+                        borderWidth: 0,
+                        hoverBackgroundColor: '#ffb820'
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: true, labels: { usePointStyle: true, padding: 20 } }
+                        legend: { display: true, labels: { usePointStyle: true, padding: 20, color: '#c0c0d0' } }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(255, 165, 2, 0.1)' },
+                            ticks: { color: '#c0c0d0' }
+                        },
+                        x: {
+                            grid: { color: 'rgba(255, 165, 2, 0.05)' },
+                            ticks: { color: '#c0c0d0' }
+                        }
                     }
                 }
             });
@@ -925,7 +1443,7 @@
             const turnos = ['Mañana', 'Tarde'];
 
             const datasets = turnos.map((turno, idx) => {
-                const colors = ['#4285f4', '#4db8ff'];
+                const colors = ['#00d4ff', '#00ff88'];
                 const data = lines.map(line => {
                     const row = filteredData.find(r => r.linea === line && r.turno === turno);
                     return row ? parseInt(row.unidades_producidas) : 0;
@@ -935,7 +1453,8 @@
                     data: data,
                     backgroundColor: colors[idx],
                     borderRadius: 8,
-                    borderWidth: 0
+                    borderWidth: 0,
+                    hoverBackgroundColor: colors[idx] === '#00d4ff' ? '#00ffff' : '#00ffaa'
                 };
             });
 
@@ -950,11 +1469,19 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: true, labels: { usePointStyle: true, padding: 20 } }
+                        legend: { display: true, labels: { usePointStyle: true, padding: 20, color: '#c0c0d0' } }
                     },
                     scales: {
-                        x: { stacked: false },
-                        y: { stacked: false }
+                        x: { 
+                            stacked: false,
+                            grid: { color: 'rgba(0, 212, 255, 0.05)' },
+                            ticks: { color: '#c0c0d0' }
+                        },
+                        y: { 
+                            stacked: false,
+                            grid: { color: 'rgba(0, 212, 255, 0.1)' },
+                            ticks: { color: '#c0c0d0' }
+                        }
                     }
                 }
             });
@@ -994,6 +1521,159 @@
             });
         }
 
+        // Análisis Inteligente
+        function generateAIInsights() {
+            if (filteredData.length === 0) {
+                document.getElementById('aiInsights').innerHTML = '<div class="insight-box"><div class="insight-label">Sin datos</div><div class="insight-value">--</div></div>';
+                return;
+            }
+
+            const insights = analyzeData(filteredData);
+            
+            let html = '';
+            
+            // Insight 1: Línea con mejor OEE
+            html += `
+                <div class="insight-box">
+                    <div class="insight-label">🏆 Mejor Línea</div>
+                    <div class="insight-value">${insights.bestLine}</div>
+                    <div style="font-size: 0.75rem; margin-top: 5px; opacity: 0.9;">OEE: ${insights.bestLineOEE}%</div>
+                </div>
+            `;
+
+            // Insight 2: Línea con menor OEE
+            html += `
+                <div class="insight-box">
+                    <div class="insight-label">⚠️ Línea Crítica</div>
+                    <div class="insight-value">${insights.worstLine}</div>
+                    <div style="font-size: 0.75rem; margin-top: 5px; opacity: 0.9;">OEE: ${insights.worstLineOEE}%</div>
+                </div>
+            `;
+
+            // Insight 3: Defect Rate
+            html += `
+                <div class="insight-box">
+                    <div class="insight-label">📊 Tasa de Defectos</div>
+                    <div class="insight-value">${insights.defectRate}</div>
+                    <div style="font-size: 0.75rem; margin-top: 5px; opacity: 0.9;">${insights.defectTrend}</div>
+                </div>
+            `;
+
+            // Insight 4: Recomendación
+            html += `
+                <div class="insight-box">
+                    <div class="insight-label">💡 Recomendación</div>
+                    <div class="insight-value" style="font-size: 0.95rem; text-transform: none;">${insights.recommendation}</div>
+                </div>
+            `;
+
+            // Insight 5: Eficiencia General
+            html += `
+                <div class="insight-box">
+                    <div class="insight-label">⚡ Eficiencia</div>
+                    <div class="insight-value">${insights.efficiency}</div>
+                    <div style="font-size: 0.75rem; margin-top: 5px; opacity: 0.9;">${insights.efficiencyStatus}</div>
+                </div>
+            `;
+
+            // Insight 6: Predicción
+            html += `
+                <div class="insight-box">
+                    <div class="insight-label">🔮 Tendencia</div>
+                    <div class="insight-value" style="font-size: 0.95rem;">${insights.trend}</div>
+                </div>
+            `;
+
+            document.getElementById('aiInsights').innerHTML = html;
+        }
+
+        // Analizar datos y generar insights
+        function analyzeData(data) {
+            if (data.length === 0) {
+                return {
+                    bestLine: '--',
+                    bestLineOEE: '--',
+                    worstLine: '--',
+                    worstLineOEE: '--',
+                    defectRate: '--',
+                    defectTrend: '--',
+                    recommendation: '--',
+                    efficiency: '--',
+                    efficiencyStatus: '--',
+                    trend: '--'
+                };
+            }
+
+            // Calcular OEE por línea
+            const lines = ['Linea A', 'Linea B', 'Linea C'];
+            const lineStats = {};
+
+            lines.forEach(line => {
+                const lineData = data.filter(row => row.linea === line);
+                if (lineData.length > 0) {
+                    const oeeAvg = lineData.reduce((sum, row) => sum + parseFloat(row.eficiencia_oee), 0) / lineData.length;
+                    const defectRate = lineData.reduce((sum, row) => sum + parseInt(row.unidades_defectuosas), 0) / lineData.reduce((sum, row) => sum + parseInt(row.unidades_producidas), 0) * 100;
+                    lineStats[line] = {
+                        oee: oeeAvg.toFixed(1),
+                        defectRate: defectRate.toFixed(2),
+                        downtime: lineData.reduce((sum, row) => sum + parseInt(row.tiempo_parada_min), 0)
+                    };
+                }
+            });
+
+            // Encontrar mejor y peor línea
+            const bestLine = Object.keys(lineStats).reduce((a, b) => parseFloat(lineStats[a].oee) > parseFloat(lineStats[b].oee) ? a : b);
+            const worstLine = Object.keys(lineStats).reduce((a, b) => parseFloat(lineStats[a].oee) < parseFloat(lineStats[b].oee) ? a : b);
+
+            // Calcular tasa de defectos general
+            const totalDefects = data.reduce((sum, row) => sum + parseInt(row.unidades_defectuosas), 0);
+            const totalProduction = data.reduce((sum, row) => sum + parseInt(row.unidades_producidas), 0);
+            const generalDefectRate = ((totalDefects / totalProduction) * 100).toFixed(2);
+
+            // Calcular OEE promedio
+            const avgOEE = (data.reduce((sum, row) => sum + parseFloat(row.eficiencia_oee), 0) / data.length).toFixed(1);
+
+            // Generar recomendación
+            let recommendation = '';
+            if (parseFloat(avgOEE) >= 90) {
+                recommendation = 'Mantener el nivel actual';
+            } else if (parseFloat(avgOEE) >= 80) {
+                recommendation = 'Optimizar procesos en curso';
+            } else if (parseFloat(avgOEE) >= 70) {
+                recommendation = 'Revisar líneas críticas';
+            } else {
+                recommendation = 'Acción correctiva urgente';
+            }
+
+            // Determinar tendencia
+            const firstHalf = data.slice(0, Math.floor(data.length / 2));
+            const secondHalf = data.slice(Math.floor(data.length / 2));
+            const oeeFirstHalf = (firstHalf.reduce((sum, row) => sum + parseFloat(row.eficiencia_oee), 0) / firstHalf.length).toFixed(1);
+            const oeeSecondHalf = (secondHalf.reduce((sum, row) => sum + parseFloat(row.eficiencia_oee), 0) / secondHalf.length).toFixed(1);
+            
+            let trend = '';
+            if (parseFloat(oeeSecondHalf) > parseFloat(oeeFirstHalf)) {
+                trend = '📈 Mejorando';
+            } else if (parseFloat(oeeSecondHalf) < parseFloat(oeeFirstHalf)) {
+                trend = '📉 Decayendo';
+            } else {
+                trend = '➡️ Estable';
+            }
+
+            return {
+                bestLine: bestLine,
+                bestLineOEE: lineStats[bestLine].oee,
+                worstLine: worstLine,
+                worstLineOEE: lineStats[worstLine].oee,
+                defectRate: generalDefectRate + '%',
+                defectTrend: lineStats[worstLine].defectRate > 3 ? '🔴 Alto' : '🟢 Bajo',
+                recommendation: recommendation,
+                efficiency: avgOEE + '%',
+                efficiencyStatus: parseFloat(avgOEE) >= 85 ? '✓ Óptima' : parseFloat(avgOEE) >= 70 ? '⊕ Aceptable' : '✗ Crítica',
+                trend: trend
+            };
+        }
+
         // Exportar a CSV
         function exportToCSV() {
             let csv = 'Fecha,Línea,Turno,Unidades Producidas,Defectuosas,Parada (min),Eficiencia OEE (%)\n';
@@ -1013,16 +1693,49 @@
 
         // Exportar a PDF
         function exportToPDF() {
-            const element = document.querySelector('.container-dashboard');
-            const opt = {
-                margin: 10,
-                filename: `dashboard_oee_${new Date().toISOString().split('T')[0]}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { orientation: 'landscape', unit: 'mm', format: 'a4' }
-            };
+            const loading = document.createElement('div');
+            loading.innerHTML = '<div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 10000;"><i class="fas fa-spinner fa-spin"></i> Generando PDF...</div>';
+            document.body.appendChild(loading);
 
-            html2pdf().set(opt).from(element).save();
+            setTimeout(() => {
+                const element = document.querySelector('.container-dashboard');
+                const opt = {
+                    margin: [15, 10, 15, 10],
+                    filename: `Dashboard_OEE_${new Date().toISOString().split('T')[0]}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true, allowTaint: true },
+                    jsPDF: { orientation: 'landscape', unit: 'mm', format: 'a4' },
+                    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+                };
+
+                html2pdf()
+                    .set(opt)
+                    .from(element)
+                    .save()
+                    .then(() => {
+                        loading.remove();
+                        showAlert('PDF exportado exitosamente', 'success');
+                    })
+                    .catch((error) => {
+                        loading.remove();
+                        showAlert('Error al generar PDF: ' + error.message, 'danger');
+                    });
+            }, 500);
+        }
+
+        // Mostrar alertas
+        function showAlert(message, type) {
+            const alert = document.createElement('div');
+            alert.className = `alert-custom alert-${type}-custom animate-in`;
+            alert.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+            alert.style.position = 'fixed';
+            alert.style.top = '80px';
+            alert.style.right = '20px';
+            alert.style.zIndex = '10000';
+            alert.style.minWidth = '300px';
+            document.body.appendChild(alert);
+            
+            setTimeout(() => alert.remove(), 4000);
         }
 
         // Actualizar fecha
