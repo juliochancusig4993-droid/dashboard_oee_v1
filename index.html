@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard OEE - Monitoreo de Producción</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- DataTables -->
+    <link href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    
+    <!-- jsPDF y html2canvas para exportación -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #1a73e8;
+            --secondary-color: #34a853;
+            --danger-color: #ea4335;
+            --warning-color: #fbbc04;
+            --dark-color: #202124;
+            --light-color: #f8f9fa;
+            --border-color: #dadce0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+
+        .navbar-custom {
+            background: linear-gradient(90deg, var(--primary-color) 0%, #1557b0 100%);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-brand i {
+            color: var(--warning-color);
+        }
+
+        .container-dashboard {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 15px;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin: 30px 0 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 5px solid var(--primary-color);
+            padding-left: 15px;
+        }
+
+        /* KPI Cards */
+        .kpi-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .kpi-card.success {
+            border-top-color: var(--secondary-color);
+        }
+
+        .kpi-card.danger {
+            border-top-color: var(--danger-color);
+        }
+
+        .kpi-card.warning {
+            border-top-color: var(--warning-color);
+        }
+
+        .kpi-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        .kpi-card.success .kpi-icon {
+            color: var(--secondary-color);
+        }
+
+        .kpi-card.danger .kpi-icon {
+            color: var(--danger-color);
+        }
+
+        .kpi-card.warning .kpi-icon {
+            color: var(--warning-color);
+        }
+
+        .kpi-card.primary .kpi-icon {
+            color: var(--primary-color);
+        }
+
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin: 10px 0;
+        }
+
+        .kpi-label {
+            font-size: 0.95rem;
+            color: #5f6368;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        .kpi-change {
+            font-size: 0.85rem;
+            margin-top: 10px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+
+        .kpi-change.positive {
+            background-color: #e6f4ea;
+            color: #137333;
+        }
+
+        .kpi-change.negative {
+            background-color: #fce8e6;
+            color: #c5221f;
+        }
+
+        /* Chart Cards */
+        .chart-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .chart-card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-color);
+        }
+
+        .chart-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-title i {
+            color: var(--primary-color);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Controles y Filtros */
+        .controls-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: var(--dark-color);
+            font-size: 0.9rem;
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 0.9rem;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+        }
+
+        .btn-custom {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary-custom {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary-custom:hover {
+            background-color: #1557b0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+        }
+
+        .btn-success-custom {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-success-custom:hover {
+            background-color: #2d894d;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 168, 83, 0.3);
+        }
+
+        .btn-danger-custom {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger-custom:hover {
+            background-color: #d33227;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(234, 67, 53, 0.3);
+        }
+
+        .btn-group-custom {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        /* Data Table */
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .datatable-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        table.dataTable thead th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            border-bottom: none;
+            padding: 15px;
+            text-align: center;
+        }
+
+        table.dataTable tbody td {
+            padding: 12px 15px;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        table.dataTable tbody tr:hover {
+            background-color: #f0f7ff;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            padding: 8px 12px;
+            margin: 0 3px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--dark-color);
+            color: #bdc1c6;
+            text-align: center;
+            padding: 20px;
+            margin-top: 50px;
+            border-top: 3px solid var(--primary-color);
+        }
+
+        .footer p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .kpi-card {
+                padding: 15px;
+            }
+
+            .kpi-value {
+                font-size: 1.8rem;
+            }
+
+            .kpi-icon {
+                font-size: 1.8rem;
+            }
+
+            .controls-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-group {
+                flex-direction: column;
+            }
+
+            .btn-group-custom {
+                margin-left: 0;
+                justify-content: center;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+        }
+
+        /* Loading */
+        .spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner.active {
+            display: block;
+        }
+
+        /* Alert Styles */
+        .alert-custom {
+            border-radius: 10px;
+            border: none;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success-custom {
+            background-color: #e6f4ea;
+            color: #137333;
+        }
+
+        .alert-warning-custom {
+            background-color: #fef7e0;
+            color: #7d6608;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container-fluid">
+            <span class="navbar-brand">
+                <i class="fas fa-chart-line"></i>
+                Dashboard OEE
+            </span>
+            <span class="text-white ms-auto" style="font-size: 0.9rem;">
+                <i class="fas fa-calendar"></i> <span id="current-date"></span>
+            </span>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container-dashboard">
+        <!-- Controles y Filtros -->
+        <div class="controls-section">
+            <div class="filter-group">
+                <label class="filter-label">Línea de Producción:</label>
+                <select class="filter-select" id="filterLinea">
+                    <option value="">Todas las líneas</option>
+                    <option value="Linea A">Línea A</option>
+                    <option value="Linea B">Línea B</option>
+                    <option value="Linea C">Línea C</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Turno:</label>
+                <select class="filter-select" id="filterTurno">
+                    <option value="">Todos los turnos</option>
+                    <option value="Mañana">Mañana</option>
+                    <option value="Tarde">Tarde</option>
+                </select>
+            </div>
+
+            <button class="btn-custom btn-primary-custom" onclick="resetFilters()">
+                <i class="fas fa-redo"></i> Reiniciar
+            </button>
+
+            <div class="btn-group-custom">
+                <button class="btn-custom btn-success-custom" onclick="exportToCSV()">
+                    <i class="fas fa-download"></i> Exportar CSV
+                </button>
+                <button class="btn-custom btn-danger-custom" onclick="exportToPDF()">
+                    <i class="fas fa-file-pdf"></i> Exportar PDF
+                </button>
+                <button class="btn-custom btn-primary-custom" onclick="window.print()">
+                    <i class="fas fa-print"></i> Imprimir
+                </button>
+            </div>
+        </div>
+
+        <!-- KPI Section -->
+        <div class="section-title">
+            <i class="fas fa-tachometer-alt"></i>
+            Indicadores Clave de Desempeño (KPI)
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="kpi-card primary">
+                    <i class="fas fa-percent kpi-icon"></i>
+                    <div class="kpi-label">OEE Promedio</div>
+                    <div class="kpi-value" id="kpiOEE">--</div>
+                    <div class="kpi-change positive" id="kpiOEEChange"></div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="kpi-card success">
+                    <i class="fas fa-boxes kpi-icon"></i>
+                    <div class="kpi-label">Unidades Producidas</div>
+                    <div class="kpi-value" id="kpiUnidades">--</div>
+                    <div class="kpi-change positive" id="kpiUnidadesChange"></div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="kpi-card danger">
+                    <i class="fas fa-exclamation-circle kpi-icon"></i>
+                    <div class="kpi-label">Tasa de Defectos</div>
+                    <div class="kpi-value" id="kpiDefectos">--</div>
+                    <div class="kpi-change negative" id="kpiDefectosChange"></div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="kpi-card warning">
+                    <i class="fas fa-stopwatch kpi-icon"></i>
+                    <div class="kpi-label">Tiempo Parada (min)</div>
+                    <div class="kpi-value" id="kpiParada">--</div>
+                    <div class="kpi-change negative" id="kpiParadaChange"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="section-title">
+            <i class="fas fa-chart-bar"></i>
+            Análisis de Rendimiento
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <i class="fas fa-arrow-trend-up"></i>
+                            Evolución del OEE
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chartOEETrend"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <i class="fas fa-industry"></i>
+                            OEE por Línea de Producción
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chartOEEByLine"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Defectos por Línea
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chartDefects"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <i class="fas fa-clock"></i>
+                            Tiempo de Parada por Línea
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chartDowntime"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-12">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <i class="fas fa-boxes"></i>
+                            Producción por Línea y Turno
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chartProduction"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Table Section -->
+        <div class="section-title">
+            <i class="fas fa-table"></i>
+            Datos Detallados de Monitoreo
+        </div>
+
+        <div class="datatable-card">
+            <table id="dataTable" class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Línea</th>
+                        <th>Turno</th>
+                        <th>Unidades Producidas</th>
+                        <th>Defectuosas</th>
+                        <th>Parada (min)</th>
+                        <th>Eficiencia OEE (%)</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>© 2026 Dashboard OEE - Monitoreo de Producción | Datos actualizados al <span id="footer-date"></span></p>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        let allData = [];
+        let filteredData = [];
+        let charts = {};
+
+        // Cargar datos del CSV
+        async function loadData() {
+            try {
+                const response = await fetch('monitoreo_oee_produccion.csv');
+                const csvText = await response.text();
+                parseCSV(csvText);
+                initializeFilters();
+                renderDashboard();
+            } catch (error) {
+                console.error('Error cargando datos:', error);
+                alert('Error al cargar los datos del CSV');
+            }
+        }
+
+        // Parsear CSV
+        function parseCSV(csvText) {
+            const lines = csvText.trim().split('\n');
+            const headers = lines[0].split(',');
+            
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim() === '') continue;
+                
+                const values = lines[i].split(',');
+                const row = {};
+                
+                headers.forEach((header, index) => {
+                    row[header.trim()] = values[index].trim();
+                });
+                
+                allData.push(row);
+            }
+            
+            filteredData = [...allData];
+        }
+
+        // Inicializar filtros
+        function initializeFilters() {
+            document.getElementById('filterLinea').addEventListener('change', applyFilters);
+            document.getElementById('filterTurno').addEventListener('change', applyFilters);
+        }
+
+        // Aplicar filtros
+        function applyFilters() {
+            const linea = document.getElementById('filterLinea').value;
+            const turno = document.getElementById('filterTurno').value;
+
+            filteredData = allData.filter(row => {
+                const matchLinea = linea === '' || row.linea === linea;
+                const matchTurno = turno === '' || row.turno === turno;
+                return matchLinea && matchTurno;
+            });
+
+            renderDashboard();
+        }
+
+        // Reiniciar filtros
+        function resetFilters() {
+            document.getElementById('filterLinea').value = '';
+            document.getElementById('filterTurno').value = '';
+            filteredData = [...allData];
+            renderDashboard();
+        }
+
+        // Renderizar dashboard completo
+        function renderDashboard() {
+            updateKPIs();
+            updateCharts();
+            updateTable();
+        }
+
+        // Actualizar KPIs
+        function updateKPIs() {
+            if (filteredData.length === 0) {
+                document.getElementById('kpiOEE').textContent = '--';
+                document.getElementById('kpiUnidades').textContent = '--';
+                document.getElementById('kpiDefectos').textContent = '--';
+                document.getElementById('kpiParada').textContent = '--';
+                return;
+            }
+
+            // OEE Promedio
+            const oeeAvg = (filteredData.reduce((sum, row) => sum + parseFloat(row.eficiencia_oee), 0) / filteredData.length).toFixed(1);
+            document.getElementById('kpiOEE').textContent = oeeAvg + '%';
+
+            // Unidades Producidas Total
+            const totalUnidades = filteredData.reduce((sum, row) => sum + parseInt(row.unidades_producidas), 0);
+            document.getElementById('kpiUnidades').textContent = totalUnidades.toLocaleString();
+
+            // Tasa de Defectos
+            const totalDefectos = filteredData.reduce((sum, row) => sum + parseInt(row.unidades_defectuosas), 0);
+            const tasaDefectos = totalUnidades > 0 ? ((totalDefectos / totalUnidades) * 100).toFixed(2) : 0;
+            document.getElementById('kpiDefectos').textContent = tasaDefectos + '%';
+
+            // Tiempo de Parada Total
+            const totalParada = filteredData.reduce((sum, row) => sum + parseInt(row.tiempo_parada_min), 0);
+            document.getElementById('kpiParada').textContent = totalParada + ' min';
+
+            // Cambios (comparación con media general)
+            const allOEEAvg = (allData.reduce((sum, row) => sum + parseFloat(row.eficiencia_oee), 0) / allData.length).toFixed(1);
+            const oeeChangePercent = ((oeeAvg - allOEEAvg) / allOEEAvg * 100).toFixed(1);
+            const oeeChangeEl = document.getElementById('kpiOEEChange');
+            oeeChangeEl.textContent = (oeeChangePercent > 0 ? '+' : '') + oeeChangePercent + '% vs. promedio';
+            oeeChangeEl.className = oeeChangePercent >= 0 ? 'kpi-change positive' : 'kpi-change negative';
+        }
+
+        // Actualizar Gráficos
+        function updateCharts() {
+            destroyCharts();
+
+            // Gráfico 1: Evolución del OEE
+            chartOEETrend();
+
+            // Gráfico 2: OEE por Línea
+            chartOEEByLine();
+
+            // Gráfico 3: Defectos
+            chartDefects();
+
+            // Gráfico 4: Downtime
+            chartDowntime();
+
+            // Gráfico 5: Producción
+            chartProduction();
+        }
+
+        // Destruir gráficos previos
+        function destroyCharts() {
+            Object.values(charts).forEach(chart => {
+                if (chart) chart.destroy();
+            });
+            charts = {};
+        }
+
+        // Gráfico 1: Evolución del OEE
+        function chartOEETrend() {
+            const dates = [...new Set(filteredData.map(row => row.fecha))].sort();
+            const oeeByDate = dates.map(date => {
+                const rowsByDate = filteredData.filter(row => row.fecha === date);
+                return (rowsByDate.reduce((sum, row) => sum + parseFloat(row.eficiencia_oee), 0) / rowsByDate.length).toFixed(1);
+            });
+
+            const ctx = document.getElementById('chartOEETrend').getContext('2d');
+            charts.oee = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'OEE (%)',
+                        data: oeeByDate,
+                        borderColor: '#1a73e8',
+                        backgroundColor: 'rgba(26, 115, 232, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 6,
+                        pointBackgroundColor: '#1a73e8',
+                        pointBorderColor: 'white',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, labels: { usePointStyle: true, padding: 20 } }
+                    },
+                    scales: {
+                        y: { min: 0, max: 100, ticks: { callback: v => v + '%' } }
+                    }
+                }
+            });
+        }
+
+        // Gráfico 2: OEE por Línea
+        function chartOEEByLine() {
+            const lines = ['Linea A', 'Linea B', 'Linea C'];
+            const oeeByLine = lines.map(line => {
+                const rowsByLine = filteredData.filter(row => row.linea === line);
+                return rowsByLine.length > 0 ? (rowsByLine.reduce((sum, row) => sum + parseFloat(row.eficiencia_oee), 0) / rowsByLine.length).toFixed(1) : 0;
+            });
+
+            const colors = ['#1a73e8', '#34a853', '#ea4335'];
+
+            const ctx = document.getElementById('chartOEEByLine').getContext('2d');
+            charts.oeeByLine = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: lines,
+                    datasets: [{
+                        label: 'OEE Promedio (%)',
+                        data: oeeByLine,
+                        backgroundColor: colors,
+                        borderRadius: 8,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    indexAxis: undefined,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, labels: { usePointStyle: true, padding: 20 } }
+                    },
+                    scales: {
+                        y: { min: 0, max: 100, ticks: { callback: v => v + '%' } }
+                    }
+                }
+            });
+        }
+
+        // Gráfico 3: Defectos por Línea
+        function chartDefects() {
+            const lines = ['Linea A', 'Linea B', 'Linea C'];
+            const defectsByLine = lines.map(line => {
+                const rowsByLine = filteredData.filter(row => row.linea === line);
+                return rowsByLine.reduce((sum, row) => sum + parseInt(row.unidades_defectuosas), 0);
+            });
+
+            const ctx = document.getElementById('chartDefects').getContext('2d');
+            charts.defects = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: lines,
+                    datasets: [{
+                        label: 'Unidades Defectuosas',
+                        data: defectsByLine,
+                        backgroundColor: '#ea4335',
+                        borderRadius: 8,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, labels: { usePointStyle: true, padding: 20 } }
+                    }
+                }
+            });
+        }
+
+        // Gráfico 4: Downtime
+        function chartDowntime() {
+            const lines = ['Linea A', 'Linea B', 'Linea C'];
+            const downtimeByLine = lines.map(line => {
+                const rowsByLine = filteredData.filter(row => row.linea === line);
+                return rowsByLine.reduce((sum, row) => sum + parseInt(row.tiempo_parada_min), 0);
+            });
+
+            const ctx = document.getElementById('chartDowntime').getContext('2d');
+            charts.downtime = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: lines,
+                    datasets: [{
+                        label: 'Tiempo de Parada (min)',
+                        data: downtimeByLine,
+                        backgroundColor: '#fbbc04',
+                        borderRadius: 8,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, labels: { usePointStyle: true, padding: 20 } }
+                    }
+                }
+            });
+        }
+
+        // Gráfico 5: Producción
+        function chartProduction() {
+            const lines = ['Linea A', 'Linea B', 'Linea C'];
+            const turnos = ['Mañana', 'Tarde'];
+
+            const datasets = turnos.map((turno, idx) => {
+                const colors = ['#4285f4', '#4db8ff'];
+                const data = lines.map(line => {
+                    const row = filteredData.find(r => r.linea === line && r.turno === turno);
+                    return row ? parseInt(row.unidades_producidas) : 0;
+                });
+                return {
+                    label: turno,
+                    data: data,
+                    backgroundColor: colors[idx],
+                    borderRadius: 8,
+                    borderWidth: 0
+                };
+            });
+
+            const ctx = document.getElementById('chartProduction').getContext('2d');
+            charts.production = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: lines,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, labels: { usePointStyle: true, padding: 20 } }
+                    },
+                    scales: {
+                        x: { stacked: false },
+                        y: { stacked: false }
+                    }
+                }
+            });
+        }
+
+        // Actualizar Tabla
+        function updateTable() {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+
+            filteredData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.fecha}</td>
+                    <td><strong>${row.linea}</strong></td>
+                    <td>${row.turno}</td>
+                    <td>${parseInt(row.unidades_producidas).toLocaleString()}</td>
+                    <td>${row.unidades_defectuosas}</td>
+                    <td>${row.tiempo_parada_min}</td>
+                    <td><strong>${row.eficiencia_oee}%</strong></td>
+                `;
+                tableBody.appendChild(tr);
+            });
+
+            if ($.fn.dataTable.isDataTable('#dataTable')) {
+                $('#dataTable').DataTable().destroy();
+            }
+
+            $('#dataTable').DataTable({
+                paging: true,
+                pageLength: 10,
+                searching: true,
+                ordering: true,
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'
+                }
+            });
+        }
+
+        // Exportar a CSV
+        function exportToCSV() {
+            let csv = 'Fecha,Línea,Turno,Unidades Producidas,Defectuosas,Parada (min),Eficiencia OEE (%)\n';
+            
+            filteredData.forEach(row => {
+                csv += `${row.fecha},${row.linea},${row.turno},${row.unidades_producidas},${row.unidades_defectuosas},${row.tiempo_parada_min},${row.eficiencia_oee}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `dashboard_oee_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Exportar a PDF
+        function exportToPDF() {
+            const element = document.querySelector('.container-dashboard');
+            const opt = {
+                margin: 10,
+                filename: `dashboard_oee_${new Date().toISOString().split('T')[0]}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { orientation: 'landscape', unit: 'mm', format: 'a4' }
+            };
+
+            html2pdf().set(opt).from(element).save();
+        }
+
+        // Actualizar fecha
+        function updateDate() {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            const today = new Date().toLocaleDateString('es-ES', options);
+            document.getElementById('current-date').textContent = today;
+            document.getElementById('footer-date').textContent = today;
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            updateDate();
+            loadData();
+        });
+    </script>
+</body>
+</html>
